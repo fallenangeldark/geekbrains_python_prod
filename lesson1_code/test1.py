@@ -1,6 +1,6 @@
-import subprocess
+﻿import subprocess
 
-args = ["ping", "www.yahoo.com"]
+args = ["ping", "www.youtube.com"]
 process = subprocess.Popen(args, stdout=subprocess.PIPE, encoding='cp866')
 data = process.communicate()
 for el in data:
