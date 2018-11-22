@@ -72,7 +72,7 @@ st_2_s = st_2_b.decode('utf-8')
 st_3_s = bytes.decode(st_3_b, 'utf-8')
 st_4_s = bytes.decode(st_4_b, 'utf-8')
 
-# print(st_1_s, st_2_s, st_3_s)# Вывод показывает что преобразование кириллицы и латиницы прошло успешно
+print(st_1_s, st_2_s, st_3_s)# Вывод показывает что преобразование кириллицы и латиницы прошло успешно
 
 
 
@@ -124,7 +124,7 @@ try:
             print(line)
 except UnicodeDecodeError:
     print("UnicodeDecodeError: 'utf-8' codec can't decode byte 0xf1 in position 0: invalid continuation byte  ")
-#Так как мы знаем что по дефолту windows сохраняет файлы в cp1251 сделаем следующее: 
+#Так как мы знаем что по дефолту windows сохраняет файлы в cp1251 сделаем следующее:
 #Откроем файл на чтение в вышеуказанной кодировке
 with open('test_file.txt', 'r', encoding='cp1251') as u2_file:
     str = ''
