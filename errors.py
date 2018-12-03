@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
 """ Errors """
+import logging
+import log.client_log_config
 
+#создаем объект-логгер с именем client.main
+logger = logging.getLogger('client.main')
 #Исключение когда имя пользователя слишком длинное
 class UsernameToLongError(Exception):
     def __init__(self, username):

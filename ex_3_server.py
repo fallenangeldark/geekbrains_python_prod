@@ -12,6 +12,10 @@ import sys
 from socket import socket, AF_INET, SOCK_STREAM
 from jim.utils import get_message, send_message
 from jim.config import *
+import logging
+import log.server_log_config
+
+logger = logging.getLogger('server.main')
 
 #Func формирования ответа
 def presence_response(presence_message):
@@ -23,9 +27,11 @@ def presence_response(presence_message):
     #Делаем проверки
     if ACTION in presence_message and presence_message[ACTION] == PRESENCE and TIME in presence_message and isinstance(presence_message[TIME], float):
         #Если все хорошо
+        logger.info('Успешная обработка сообщения от {}.'.format(addr))
         return {RESPONSE: 200}
     else:
         #Шлем код ошибки
+        logger.error('Неверный запрос.')
         return {RESPONSE: 400, ERROR: 'Неверный запрос'}
 
 #Запускаем сервер
@@ -40,6 +46,7 @@ if __name__ == '__main__':
     #если ip не указан в параметрах
     except IndexError:
         addr = ''
+        logger.info('Просшушиваем все адреса.')
     # порт
     #если порт указан в параметрах
     try:
@@ -47,10 +54,11 @@ if __name__ == '__main__':
     #если порт не указан в параметрах
     except IndexError:
         port = 7777
+        logger.info('Порт установлен по умолчанию на {}.'.format(port))
     #Если порт не целое число
     except ValueError:
-        print('Порт должен быть целым числом')
-        # sys.exit(0)
+        logger.debug('Порт должен быть целым числом.')
+        sys.exit(0)
 
     server.bind((addr, port)) #присваивает порт 7777
     server.listen(5)
@@ -60,10 +68,9 @@ if __name__ == '__main__':
         #принимает сообщение клиента
         presence = get_message(client)
         print(presence)
-        print(client)
+        # print(client)
         #формирует ответ
         response = presence_response(presence)
         #отправляет ответ клиенту
         send_message(client, response)
-        client.shutdown()
         client.close()
