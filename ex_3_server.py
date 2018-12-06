@@ -14,10 +14,12 @@ from jim.utils import get_message, send_message
 from jim.config import *
 import logging
 import log.server_log_config
+from log.decorators import Log
 
 logger = logging.getLogger('server.main')
-
+deco_log = Log(logger)
 #Func формирования ответа
+@deco_log
 def presence_response(presence_message):
     """
     Формирование ответа клиенту
@@ -27,11 +29,11 @@ def presence_response(presence_message):
     #Делаем проверки
     if ACTION in presence_message and presence_message[ACTION] == PRESENCE and TIME in presence_message and isinstance(presence_message[TIME], float):
         #Если все хорошо
-        logger.info('Успешная обработка сообщения от {}.'.format(addr))
+        # logger.info('Успешная обработка сообщения от {}.'.format(addr))
         return {RESPONSE: 200}
     else:
         #Шлем код ошибки
-        logger.error('Неверный запрос.')
+        # logger.error('Неверный запрос.')
         return {RESPONSE: 400, ERROR: 'Неверный запрос'}
 
 #Запускаем сервер

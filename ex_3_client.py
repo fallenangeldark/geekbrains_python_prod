@@ -19,9 +19,12 @@ from jim.config import *
 from jim.utils import send_message, get_message
 import logging
 import log.client_log_config
+from log.decorators import Log
 
 logger = logging.getLogger('client.main')
+deco_log = Log(logger)
 #функция формирования сообщения
+@deco_log
 def create_presence(account_name='Guest'):
     """
     Сформировать presence - сообщения
@@ -50,7 +53,7 @@ def create_presence(account_name='Guest'):
     return message
 
 
-
+@deco_log
 def translate_message(response):
     """
     Разбор сообщения
@@ -59,24 +62,24 @@ def translate_message(response):
     """
     #Передали не словарь
     if not isinstance(response, dict):
-        logger.error('Неверный тип сообщения.')
+        # logger.error('Неверный тип сообщения.')
         raise TypeError
     #Нету ключа response
     if RESPONSE not in response:
         #Ошибка нужен обязательный ключ
-        logger.error('Ключ не верен или не обнаружен.')
+        # logger.error('Ключ не верен или не обнаружен.')
         raise MandatoryKeyError(RESPONSE)
     #если все хорошо то получаем код ответа
     code = response[RESPONSE]
     #длина кода не 3 символа
     if len(str(code)) != 3:
         #Ошибка неверной длины кода ошибки
-        logger.error('Длина ключа ошибочна.')
+        # logger.error('Длина ключа ошибочна.')
         raise ResponseCodeLenError(code)
     #неправильные коды символов
     if code not in RESPONSE_CODES:
         #ошибка неверный код ответа
-        logger.error('Неверный код ответа.')
+        # logger.error('Неверный код ответа.')
         raise ResponseCodeError(code)
     #возвращаем ответ
     return response
