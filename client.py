@@ -1,43 +1,64 @@
 from socket import *
 import sys
+from threading import Thread, Timer
+from queue import Queue
+import time
+import threading
 
+LIVE = True
 ADDRESS = ('localhost', 10000)
+sock = socket(AF_INET, SOCK_STREAM)
+sock.connect(ADDRESS)
 
-def echo_client():
-    with socket(AF_INET, SOCK_STREAM) as sock:
-        sock.connect(ADDRESS)
-        m = sock.recv(1024).decode('ascii')
-        print(m)
-        msg = input('Listen (l) / Send (s)/ exit (q): ')
-        if msg == 'l':
-            while True:
-                data = sock.recv(1024).decode('ascii')
-                print(data)
-        elif msg == 's':
-            while True:
-                new_mes = input('Ваше сообщение: ')
-                sock.send(new_mes.encode('ascii'))
-        elif msg == 'q':
-            while True:
-                break
 
-        # while True:
-        #     # data = sock.recv(1024).decode('ascii')
-        #     msg = input('Ваше сообщение: ')
-        #     if msg == 'exit':
-        #         break
-        #     elif msg == 'l':
-        #         while True:
-        #             data = sock.recv(1024).decode('ascii')
-        #             print(data)
-        #             new_mes = input('Listen (any key)/ Send (s)')
-        #             if new_mes == 's':
-        #                 break
-        #             else:
-        #                 pass
-        #     sock.send(msg.encode('ascii'))
-        #     data = sock.recv(1024).decode('ascii')
-        #     print('Ответ: ', data)
+
+class ClientThread(Thread):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.q = Queue()
+
+    def get_mes(self):
+        global sock
+        get_m = sock.recv(1024).decode('ascii')
+        self.q.put(get_m)
+
+    def send_mes(self):
+        global sock
+
+        new_m = sys.stdin.readline()
+        if new_m:
+            new_m = sock.send(new_m.encode('ascii'))
+            self.q.put(new_m)
+            self.q.task_done()
+        self.q.task_done()
+
+
+    def close(self):
+        self.q.put(None)
+        self.q.join()
+
+    def run(self):
+        global sock
+        global LIVE
+        print('Press <Enter> to get message | some_text + <Enter> to send. You have 30 seconds')
+        while True:
+            try:
+                item = self.q.get(timeout=30)
+                    # self.q.task_done()
+                    # break
+                print(item)
+            except Exception as e:
+                print('Haven\'t messages')
+
+                sock.close()
+                self.q.join()
+        self.q.join()
+
 
 if __name__ == '__main__':
-    echo_client()
+    cli = ClientThread()
+    cli.start()
+    while True:
+        cli.get_mes()
+        cli.send_mes()
+    cli.close()
